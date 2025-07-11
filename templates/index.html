@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Face Glasses App</title>
+    <title>3D Face Glasses App - MediaPipe Enhanced</title>
     <style>
         * {
             margin: 0;
@@ -25,8 +25,8 @@
             padding: 40px;
             border-radius: 20px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            max-width: 600px;
-            width: 90%;
+            max-width: 800px;
+            width: 95%;
         }
         
         h1 {
@@ -44,71 +44,143 @@
             font-size: 1.1em;
         }
         
+        .tabs {
+            display: flex;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #eee;
+        }
+        
+        .tab-button {
+            background: none;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            cursor: pointer;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .tab-button.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
         .upload-area {
             border: 3px dashed #ddd;
             border-radius: 15px;
             padding: 40px;
             text-align: center;
-            margin-bottom: 30px;
-            transition: all 0.3s ease;
             cursor: pointer;
-            background: #f9f9f9;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
         }
         
         .upload-area:hover {
             border-color: #667eea;
-            background: #f0f4ff;
+            background: #f8f9ff;
         }
         
         .upload-area.dragover {
             border-color: #667eea;
-            background: #e6f0ff;
+            background: #f0f4ff;
         }
         
         .upload-icon {
             font-size: 3em;
-            color: #ddd;
             margin-bottom: 20px;
         }
         
         .upload-text {
-            font-size: 1.2em;
             color: #666;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+        
+        .upload-hint {
+            color: #999;
+            font-size: 0.9em;
+        }
+        
+        .webcam-container {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .webcam-video {
+            width: 100%;
+            max-width: 640px;
+            height: 480px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            background: #f0f0f0;
+        }
+        
+        .webcam-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
             margin-bottom: 20px;
         }
         
-        .file-input {
-            display: none;
-        }
-        
-        .upload-button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
             color: white;
-            padding: 15px 30px;
             border: none;
+            padding: 12px 30px;
             border-radius: 25px;
-            cursor: pointer;
             font-size: 1.1em;
-            font-weight: bold;
+            cursor: pointer;
             transition: all 0.3s ease;
-            margin-top: 20px;
+            font-weight: bold;
         }
         
-        .upload-button:hover {
+        .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
         
-        .upload-button:disabled {
+        .btn:disabled {
             background: #ccc;
             cursor: not-allowed;
             transform: none;
         }
         
+        .btn-secondary {
+            background: #6c757d;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        .preview {
+            display: none;
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .preview img {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
         .loading {
             display: none;
             text-align: center;
-            margin: 30px 0;
+            padding: 20px;
+            color: #667eea;
         }
         
         .spinner {
@@ -118,7 +190,7 @@
             width: 40px;
             height: 40px;
             animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
+            margin: 0 auto 10px;
         }
         
         @keyframes spin {
@@ -127,73 +199,148 @@
         }
         
         .result {
+            margin-top: 20px;
             text-align: center;
-            margin-top: 30px;
         }
         
         .result img {
             max-width: 100%;
-            height: auto;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-        
-        .error {
-            color: #e74c3c;
-            background: #ffe6e6;
-            padding: 15px;
+            max-height: 500px;
             border-radius: 10px;
-            margin: 20px 0;
-            border-left: 4px solid #e74c3c;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
         
         .success {
-            color: #27ae60;
-            background: #e6ffe6;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 20px 0;
-            border-left: 4px solid #27ae60;
+            color: #28a745;
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 1.2em;
         }
         
-        .preview {
-            margin: 20px 0;
+        .error {
+            color: #dc3545;
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+        
+        .features {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9ff;
+            border-radius: 10px;
+        }
+        
+        .features h3 {
+            color: #333;
+            margin-bottom: 15px;
             text-align: center;
         }
         
-        .preview img {
-            max-width: 200px;
-            height: auto;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        .features-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        .feature-tag {
+            background: #667eea;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .status.running {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status.stopped {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .tab-button {
+                padding: 10px 20px;
+            }
+            
+            .webcam-video {
+                height: 300px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🤓 Face Glasses App</h1>
-        <p class="subtitle">Upload an image and I'll add stylish glasses to detected faces!</p>
+        <h1>🥽 3D Face Glasses</h1>
+        <p class="subtitle">Powered by MediaPipe & 3D Rendering</p>
         
-        <form id="uploadForm" enctype="multipart/form-data">
-            <div class="upload-area" id="uploadArea">
-                <div class="upload-icon">📸</div>
-                <div class="upload-text">Drop your image here or click to browse</div>
-                <input type="file" name="image" id="imageInput" class="file-input" accept="image/*" required>
-                <button type="button" class="upload-button" onclick="document.getElementById('imageInput').click()">
-                    Choose Image
+        <div class="tabs">
+            <button class="tab-button active" onclick="showTab('upload')">📸 Upload Image</button>
+            <button class="tab-button" onclick="showTab('webcam')">🎥 Live Webcam</button>
+        </div>
+        
+        <!-- Upload Tab -->
+        <div id="upload-tab" class="tab-content active">
+            <form id="uploadForm" enctype="multipart/form-data">
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">📷</div>
+                    <div class="upload-text">Drag & drop your image here</div>
+                    <div class="upload-hint">or click to select a file</div>
+                    <input type="file" id="imageInput" accept="image/*" style="display: none;">
+                </div>
+                
+                <div class="preview" id="preview">
+                    <img id="previewImage" alt="Preview">
+                </div>
+                
+                <button type="submit" class="btn" id="processButton" disabled>
+                    Select Image First
                 </button>
+            </form>
+        </div>
+        
+        <!-- Webcam Tab -->
+        <div id="webcam-tab" class="tab-content">
+            <div class="webcam-container">
+                <div id="webcam-status" class="status stopped">
+                    Webcam: Stopped
+                </div>
+                
+                <img id="webcam-stream" class="webcam-video" src="" alt="Webcam stream will appear here">
+                
+                <div class="webcam-controls">
+                    <button class="btn" id="startWebcam" onclick="startWebcam()">
+                        ▶️ Start Webcam
+                    </button>
+                    <button class="btn btn-secondary" id="stopWebcam" onclick="stopWebcam()" disabled>
+                        ⏹️ Stop Webcam
+                    </button>
+                </div>
+                
+                <div class="upload-hint">
+                    The webcam will show real-time 3D glasses overlay using MediaPipe face detection
+                </div>
             </div>
-            
-            <div class="preview" id="preview" style="display: none;">
-                <img id="previewImage" src="" alt="Preview">
-            </div>
-            
-            <div style="text-align: center;">
-                <button type="submit" class="upload-button" id="processButton" disabled>
-                    Add Glasses! 🤓
-                </button>
-            </div>
-        </form>
+        </div>
         
         <div class="loading" id="loading">
             <div class="spinner"></div>
@@ -204,6 +351,17 @@
         
         <div class="result" id="result">
             <!-- Result will be displayed here -->
+        </div>
+        
+        <div class="features">
+            <h3>✨ Features</h3>
+            <div class="features-list">
+                <span class="feature-tag">MediaPipe Face Detection</span>
+                <span class="feature-tag">3D GLB Rendering</span>
+                <span class="feature-tag">Real-time Webcam</span>
+                <span class="feature-tag">Accurate Positioning</span>
+                <span class="feature-tag">Multiple Faces</span>
+            </div>
         </div>
     </div>
 
@@ -217,8 +375,97 @@
         const previewImage = document.getElementById('previewImage');
         const message = document.getElementById('message');
         const result = document.getElementById('result');
+        const webcamStream = document.getElementById('webcam-stream');
+        const webcamStatus = document.getElementById('webcam-status');
+        const startWebcamBtn = document.getElementById('startWebcam');
+        const stopWebcamBtn = document.getElementById('stopWebcam');
+        
+        let isWebcamRunning = false;
 
-        // Drag and drop functionality
+        // Tab switching
+        function showTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabName + '-tab').classList.add('active');
+            
+            // Add active class to clicked button
+            event.target.classList.add('active');
+            
+            // Clear previous results
+            message.innerHTML = '';
+            result.innerHTML = '';
+        }
+
+        // Webcam functions
+        async function startWebcam() {
+            try {
+                startWebcamBtn.disabled = true;
+                startWebcamBtn.textContent = 'Starting...';
+                
+                // Start webcam stream
+                webcamStream.src = '/webcam';
+                webcamStream.style.display = 'block';
+                
+                // Update status
+                webcamStatus.textContent = 'Webcam: Running';
+                webcamStatus.className = 'status running';
+                
+                // Enable stop button
+                stopWebcamBtn.disabled = false;
+                startWebcamBtn.textContent = '▶️ Start Webcam';
+                
+                isWebcamRunning = true;
+                
+            } catch (error) {
+                console.error('Error starting webcam:', error);
+                message.innerHTML = `<div class="error">❌ Error starting webcam: ${error.message}</div>`;
+                startWebcamBtn.disabled = false;
+                startWebcamBtn.textContent = '▶️ Start Webcam';
+            }
+        }
+
+        async function stopWebcam() {
+            try {
+                stopWebcamBtn.disabled = true;
+                stopWebcamBtn.textContent = 'Stopping...';
+                
+                // Stop webcam stream
+                webcamStream.src = '';
+                webcamStream.style.display = 'none';
+                
+                // Update status
+                webcamStatus.textContent = 'Webcam: Stopped';
+                webcamStatus.className = 'status stopped';
+                
+                // Enable start button
+                startWebcamBtn.disabled = false;
+                stopWebcamBtn.disabled = true;
+                stopWebcamBtn.textContent = '⏹️ Stop Webcam';
+                
+                isWebcamRunning = false;
+                
+            } catch (error) {
+                console.error('Error stopping webcam:', error);
+                message.innerHTML = `<div class="error">❌ Error stopping webcam: ${error.message}</div>`;
+                stopWebcamBtn.disabled = false;
+                stopWebcamBtn.textContent = '⏹️ Stop Webcam';
+            }
+        }
+
+        // Upload functionality
+        uploadArea.addEventListener('click', () => {
+            imageInput.click();
+        });
+
         uploadArea.addEventListener('dragover', (e) => {
             e.preventDefault();
             uploadArea.classList.add('dragover');
@@ -239,13 +486,11 @@
             }
         });
 
-        // File input change handler
         imageInput.addEventListener('change', handleFileSelect);
 
         function handleFileSelect() {
             const file = imageInput.files[0];
             if (file) {
-                // Show preview
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     previewImage.src = e.target.result;
@@ -253,20 +498,17 @@
                 };
                 reader.readAsDataURL(file);
 
-                // Enable process button
                 processButton.disabled = false;
-                processButton.textContent = 'Add Glasses! 🤓';
+                processButton.textContent = 'Add 3D Glasses! 🥽';
             }
         }
 
-        // Form submission
         uploadForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const formData = new FormData();
             formData.append('image', imageInput.files[0]);
             
-            // Show loading
             loading.style.display = 'block';
             processButton.disabled = true;
             processButton.textContent = 'Processing...';
@@ -286,8 +528,8 @@
                     const imageUrl = URL.createObjectURL(blob);
                     
                     result.innerHTML = `
-                        <div class="success">✅ Glasses added successfully!</div>
-                        <img src="${imageUrl}" alt="Result with glasses">
+                        <div class="success">✅ 3D glasses added successfully!</div>
+                        <img src="${imageUrl}" alt="Result with 3D glasses">
                     `;
                 } else {
                     const errorData = await response.json();
@@ -299,7 +541,14 @@
             }
             
             processButton.disabled = false;
-            processButton.textContent = 'Add Glasses! 🤓';
+            processButton.textContent = 'Add 3D Glasses! 🥽';
+        });
+
+        // Cleanup webcam on page unload
+        window.addEventListener('beforeunload', () => {
+            if (isWebcamRunning) {
+                stopWebcam();
+            }
         });
     </script>
 </body>
